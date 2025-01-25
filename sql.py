@@ -2,8 +2,9 @@ import sqlite3
 from datetime import datetime, timedelta
 from ocr import string_to_time, time_to_string
 
+
 def db(db_str):
-    con = sqlite3.connect('data.db')
+    con = sqlite3.connect("data.db")
     c = con.cursor()
     # print(db_str)
     c.execute(db_str)
@@ -12,19 +13,23 @@ def db(db_str):
     con.close()
     return output
 
+
 def db_create_table():
     db_str = "CREATE TABLE jobs(account INTEGER, job TEXT, time datetime)"
     db(db_str)
 
+
 def db_delete_table(table):
     db_str = f"DROP TABLE {table}"
     db(db_str)
+
 
 def db_add(account, job, time):
     if not isinstance(account, int):
         account = account.number
     db_str = f"INSERT INTO jobs VALUES ({account}, '{job}', '{time}')"
     db(db_str)
+
 
 def db_update(account, job, time, use_account_number=False):
     if use_account_number:
@@ -43,6 +48,7 @@ def db_update(account, job, time, use_account_number=False):
     else:
         print("Records not updated")
 
+
 def db_delete(rowid):
     if rowid == "all":
         db_str = f"DELETE from jobs"
@@ -50,11 +56,13 @@ def db_delete(rowid):
         db_str = f"DELETE from jobs WHERE rowid = {rowid}"
     db(db_str)
 
+
 def db_delete_job(job):
     db_str = f"DELETE from jobs WHERE job = {job}"
     db(db_str)
 
-def db_view(job='all', no=5):
+
+def db_view(job="all", no=5):
     output = db_get(job=job, no=no)
     count = 0
     for x in output:
@@ -62,13 +70,16 @@ def db_view(job='all', no=5):
             time = string_to_time(x[2])
             time = time_to_string(time)
             tabs = "\t"
-            if len(x[1]) <= 5: tabs += "\t"
-            if len(x[1]) <= 9: tabs += "\t"
+            if len(x[1]) <= 5:
+                tabs += "\t"
+            if len(x[1]) <= 9:
+                tabs += "\t"
             print("Account:", x[0], " Job:", x[1], tabs + "Time:", time)
         count += 1
 
-def db_view_builds(job='all', no=5):
-    output = db_get(job='all', no=no)
+
+def db_view_builds(job="all", no=5):
+    output = db_get(job="all", no=no)
     count = 0
     for account, job, time in output:
         if count < no:
@@ -76,18 +87,22 @@ def db_view_builds(job='all', no=5):
                 time = string_to_time(time)
                 time = time_to_string(time)
                 tabs = "\t"
-                if len(job) <= 5: tabs += "\t"
-                if len(job) <= 9: tabs += "\t"
+                if len(job) <= 5:
+                    tabs += "\t"
+                if len(job) <= 9:
+                    tabs += "\t"
                 print("Account:", account, " Job:", job, tabs + "Time:", time)
                 count += 1
 
-def db_get(job='all', no=5):
-    if job == 'all':
+
+def db_get(job="all", no=5):
+    if job == "all":
         db_str = "SELECT * FROM jobs ORDER BY time"
     else:
         db_str = f"SELECT * FROM jobs WHERE job='{job}' ORDER BY time"
     output = db(db_str)
     return output
+
 
 def db_read(account, job):
     try:
@@ -104,37 +119,63 @@ def db_read(account, job):
     # print(time.astimezone().isoformat())
     return time
 
+
 def initial_entries(accounts, zero_account):
-    db_delete('all')
+    db_delete("all")
     time = datetime.now() + timedelta(days=0)
     for x in accounts:
-        for y in ["build", "build_b", "research", "lose_trophies", "attack", "donate", "coin", ]:
+        for y in [
+            "build",
+            "build_b",
+            "research",
+            "lose_trophies",
+            "attack",
+            "donate",
+            "coin",
+        ]:
             db_add(x, y, time)
     db_add(zero_account, "sweep", time)
     db_add(zero_account, "games", time)
 
+
 def add_entries():
     time = datetime.now() + timedelta(minutes=-20)
-    for x in range(1,3):
+    for x in range(1, 3):
         for y in ["sweep"]:
             db_add(x, y, time)
+
 
 def add_entries_all():
     # print("add_entries all")
     time = datetime.now() + timedelta(minutes=-20)
     db_add(0, "games", time)
 
+
 # add_entries_all()
+
 
 def update_entries():
     time = datetime.now() + timedelta(minutes=0)
-    for x in range(1,4):
-        for y in ["build", "attack", "build_b", "attack_b", "clock", "coin", "research", "research_b", "donate", "coin"]:
+    for x in range(1, 4):
+        for y in [
+            "build",
+            "attack",
+            "build_b",
+            "attack_b",
+            "clock",
+            "coin",
+            "research",
+            "research_b",
+            "donate",
+            "coin",
+        ]:
             db_update(x, y, time)
+
 
 # db_update(2, "lose_trophies", datetime.now(), use_account_number=True)
 # db_update(3, "lose_trophies", datetime.now(), use_account_number=True)
 # db_update(4, "lose_trophies", datetime.now(), use_account_number=True)
+
 
 def db_next_job():
     db_str = "SELECT * FROM jobs ORDER BY time"
@@ -152,7 +193,7 @@ def db_next_job():
         return result[0]
 
 
-# db_create_table()
+db_create_table()
 # db_delete('all')
 # db_delete_table('jobs')
 # db_add(2, "attack", datetime.datetime.now())
